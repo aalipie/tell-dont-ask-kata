@@ -93,4 +93,11 @@ public class Order {
         setStatus(approvalRequest ? OrderStatus.APPROVED : OrderStatus.REJECTED);
     }
 
+    public void addItem(Product product, int quantity) {
+        OrderItem orderItem = new OrderItem(product, quantity);
+        items.add(orderItem);
+        this.total = total.add(product.getTaxedAmount(quantity));
+        this.tax = tax.add(product.getTaxAmount(quantity));
+    }
+
 }

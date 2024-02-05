@@ -8,6 +8,14 @@ public class OrderItem {
     private BigDecimal taxedAmount;
     private BigDecimal tax;
 
+    public OrderItem(Product product, int quantity) {
+        this.product = product;
+        this.quantity = quantity;
+        this.taxedAmount = product.getTaxedAmount(quantity);
+        this.tax = product.getTaxAmount(quantity);
+
+    }
+
     public Product getProduct() {
         return product;
     }
@@ -26,10 +34,6 @@ public class OrderItem {
 
     public BigDecimal getTaxedAmount() {
         return taxedAmount;
-    }
-
-    public void setTaxedAmount(BigDecimal taxedAmount) {
-        this.taxedAmount = taxedAmount;
     }
 
     public BigDecimal getTax() {

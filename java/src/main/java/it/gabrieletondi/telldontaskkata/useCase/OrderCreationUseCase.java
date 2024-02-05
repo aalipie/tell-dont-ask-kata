@@ -32,18 +32,7 @@ public class OrderCreationUseCase {
                 throw new UnknownProductException();
             }
             else {
-                final BigDecimal taxedAmount = product.getTaxedAmount(itemRequest.getQuantity());
-                final BigDecimal taxAmount = product.getTaxAmount(itemRequest.getQuantity());
-
-                final OrderItem orderItem = new OrderItem();
-                orderItem.setProduct(product);
-                orderItem.setQuantity(itemRequest.getQuantity());
-                orderItem.setTax(taxAmount);
-                orderItem.setTaxedAmount(taxedAmount);
-                order.getItems().add(orderItem);
-
-                order.setTotal(order.getTotal().add(taxedAmount));
-                order.setTax(order.getTax().add(taxAmount));
+                order.addItem(product, itemRequest.getQuantity());
             }
         }
 
