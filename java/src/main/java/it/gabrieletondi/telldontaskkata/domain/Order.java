@@ -1,8 +1,13 @@
 package it.gabrieletondi.telldontaskkata.domain;
 
-import it.gabrieletondi.telldontaskkata.repository.OrderRepository;
+import static it.gabrieletondi.telldontaskkata.domain.OrderStatus.APPROVED;
+import static it.gabrieletondi.telldontaskkata.domain.OrderStatus.CREATED;
+import static it.gabrieletondi.telldontaskkata.domain.OrderStatus.REJECTED;
+import static it.gabrieletondi.telldontaskkata.domain.OrderStatus.SHIPPED;
+
 import it.gabrieletondi.telldontaskkata.useCase.ApprovedOrderCannotBeRejectedException;
-import it.gabrieletondi.telldontaskkata.useCase.OrderApprovalRequest;
+import it.gabrieletondi.telldontaskkata.useCase.OrderCannotBeShippedException;
+import it.gabrieletondi.telldontaskkata.useCase.OrderCannotBeShippedTwiceException;
 import it.gabrieletondi.telldontaskkata.useCase.RejectedOrderCannotBeApprovedException;
 import it.gabrieletondi.telldontaskkata.useCase.ShippedOrdersCannotBeChangedException;
 import java.math.BigDecimal;
@@ -22,7 +27,7 @@ public class Order {
         this.currency = "EUR";
         this.items = new ArrayList<>();
         this.tax = new BigDecimal("0.00");
-        this.status = OrderStatus.CREATED;
+        this.status = CREATED;
     }
 
     public BigDecimal getTotal() {
@@ -75,22 +80,22 @@ public class Order {
 
     private void validate(Boolean approvalRequest) {
 
-        if (getStatus().equals(OrderStatus.SHIPPED)) {
+        if (getStatus().equals(SHIPPED)) {
             throw new ShippedOrdersCannotBeChangedException();
         }
 
-        if (approvalRequest && getStatus().equals(OrderStatus.REJECTED)) {
+        if (approvalRequest && getStatus().equals(REJECTED)) {
             throw new RejectedOrderCannotBeApprovedException();
         }
 
-        if (!approvalRequest && getStatus().equals(OrderStatus.APPROVED)) {
+        if (!approvalRequest && getStatus().equals(APPROVED)) {
             throw new ApprovedOrderCannotBeRejectedException();
         }
     }
 
     public void approveOrder(boolean approvalRequest) {
         validate(approvalRequest);
-        setStatus(approvalRequest ? OrderStatus.APPROVED : OrderStatus.REJECTED);
+        setStatus(approvalRequest ? APPROVED : REJECTED);
     }
 
     public void addItem(Product product, int quantity) {
@@ -98,6 +103,18 @@ public class Order {
         items.add(orderItem);
         this.total = total.add(product.getTaxedAmount(quantity));
         this.tax = tax.add(product.getTaxAmount(quantity));
+    }
+
+    public void ship() {
+        if (status.equals(CREATED) || status.equals(REJECTED)) {
+            throw new OrderCannotBeShippedException();
+        }
+
+        if (status.equals(SHIPPED)) {
+            throw new OrderCannotBeShippedTwiceException();
+        }
+
+        this.status = SHIPPED;
     }
 
 }

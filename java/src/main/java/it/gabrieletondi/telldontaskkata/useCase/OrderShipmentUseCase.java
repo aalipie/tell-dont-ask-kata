@@ -20,18 +20,8 @@ public class OrderShipmentUseCase {
 
     public void run(OrderShipmentRequest request) {
         final Order order = orderRepository.getById(request.getOrderId());
-
-        if (order.getStatus().equals(CREATED) || order.getStatus().equals(REJECTED)) {
-            throw new OrderCannotBeShippedException();
-        }
-
-        if (order.getStatus().equals(SHIPPED)) {
-            throw new OrderCannotBeShippedTwiceException();
-        }
-
+        order.ship();
         shipmentService.ship(order);
-
-        order.setStatus(OrderStatus.SHIPPED);
         orderRepository.save(order);
     }
 }
